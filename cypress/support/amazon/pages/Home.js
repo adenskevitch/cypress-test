@@ -1,11 +1,20 @@
-class HomePage {
+import Header from "../components/Header";
+import NavigationFooter from "../components/NavigationFooter";
+import AbstractPage from "./AbstractPage";
+
+class HomePage extends AbstractPage {
     constructor() {
-        this.accountButton = '#nav-link-accountList';
+        super();
+        this.headerPanel = new Header();
+        this.navigationFooter = new NavigationFooter();
     };
 
-    clickOnAccountButton() {
-        cy.get(this.accountButton).click();
-    };
+    
+
+    getHeader() {
+        return this.headerPanel;
+    }
+
 };
 
 export default HomePage;

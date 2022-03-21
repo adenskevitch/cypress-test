@@ -1,20 +1,17 @@
+import AbstractPage from "./AbstractPage";
 import SignIn from "./SignIn";
 
-class ErrorEnableCookesPage {
+class ErrorEnableCookesPage extends AbstractPage {
     constructor() {
+        super();
         this.goBackButton = '.amzn-btn';
     };
 
     clickOnGoBackButton() {
-        cy.get(this.goBackButton).should('be.visible');
-
-        cy.get(this.goBackButton).click();
+        this.clickOnElement(this.goBackButton);
         return new SignIn();
     };
 
-    // isGoBackButtonVisible(){
-    //     cy.get(this.goBackButton).should('be.visible');
-    // }
 };
 
 export default ErrorEnableCookesPage;
