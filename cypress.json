@@ -1,1 +1,10 @@
-{}
+{
+    "baseUrl": "https://www.amazon.com",
+    "ignoreTestFiles": [
+        "**/1-getting-started/*",
+        "**/2-advanced-examples/*"
+    ],
+    "defaultCommandTimeout": 10000,
+    "viewportWidth": 1550,
+    "viewportHeight": 1000
+}
