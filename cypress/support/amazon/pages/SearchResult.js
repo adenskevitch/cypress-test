@@ -7,7 +7,13 @@ class SearchResultPage extends AbstractPage {
         super();
         this.filterBlock = new FilterBlock();
         this.productsBlock = new ProductsBlock();
+        this.loadingIndicator = '.s-result-list-placeholder .a-spinner';
     }
+
+    waitUntilLoadingCircleHides() {
+        cy.get(this.loadingIndicator).should('not.be.visible');
+    }
+
 
     productPriceValidation(lessThan) {
         cy.get('[data-component-type="s-search-result"] .a-price-whole').each(el => {

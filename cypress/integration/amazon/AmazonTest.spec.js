@@ -63,7 +63,7 @@ describe('Amazon tests', () => {
 
     });
 
-    describe.only('Filter test', () => {
+    describe('Filter test', () => {
         const searchResultPage = new SearchResultPage();
 
         before(() => {
@@ -81,6 +81,31 @@ describe('Amazon tests', () => {
         it('Products price should be less than 500', () => {
             searchResultPage.productPriceValidation(500);
         });
+    });
+
+    describe.only('Waits implementation', () => {
+        const searchResultPage = new SearchResultPage();
+
+        before(() => {
+            cy.visit('/');
+            homePage.getHeader().searchProductOnName('laptop');
+
+
+        });
+
+        it('Price range filter should be apply', () => {
+            searchResultPage.getFilterBlock().applyPriceFilter(0, 500);
+        });
+
+        it('Brand should be selected', { retries: { openMode: 5 } }, () => {
+            searchResultPage.getFilterBlock().selectBrands('ASUS');
+        });
+
+        it('Loading indicator should be hiden',
+            { retries: { openMode: 5 }, defaultCommandTimeout: 5000 }, () => {
+                searchResultPage.waitUntilLoadingCircleHides();
+            });
+
     });
 
 });
