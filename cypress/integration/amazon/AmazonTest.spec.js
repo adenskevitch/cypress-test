@@ -83,14 +83,12 @@ describe('Amazon tests', () => {
         });
     });
 
-    describe.only('Waits implementation', () => {
+    describe('Waits implementation', () => {
         const searchResultPage = new SearchResultPage();
 
         before(() => {
             cy.visit('/');
             homePage.getHeader().searchProductOnName('laptop');
-
-
         });
 
         it('Price range filter should be apply', () => {
@@ -107,5 +105,39 @@ describe('Amazon tests', () => {
             });
 
     });
+
+    describe.only('Interceptions', () => {
+        const signInPage = new SignIn();
+
+        beforeEach(() => {
+            cy.visit('/');
+
+        })
+
+        it('Request should include valid email', () => {
+            cy.intercept('POST', '/ap/*', requ => {
+                // expect(requ.body).to.include('as1q1q1q1qqd%40asd.asd');
+                console.log(requ);
+            }).as('req');
+
+            homePage.getHeader().clickOnAccountButton();
+            signInPage.inputTextToElement('as1q1q1q1qqd@asd.asd', signInPage.nameField);
+            signInPage.clickContinue();
+
+            cy.wait('@req').then(inter =>
+                expect(inter.request.body).to.include('as1q1q1q1qqd%40asd.asd'));
+        });
+
+        it.only('Request should include valid product name', () => {
+            cy.intercept('GET', '/ap/*', requ => {
+                console.log(requ);
+            }).as('req');
+
+            homePage.getHeader().searchProductOnName('laptop');
+
+            cy.wait('@req').then(inter =>
+                expect(inter.request.body).to.include('laptop'));
+        });
+    })
 
 });
