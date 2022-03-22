@@ -44,19 +44,43 @@ describe('Amazon tests', () => {
         });
     });
 
-    describe.only('verification search any product', () => {
+    describe('verification search any product', () => {
 
         it('page with search products should be opened', () => {
             cy.visit('/');
-            homePage.getHeader().searchProductOnName('laptop');
-        })
-
-        it('Shoul include search line in product title', () => {
-
-            const searchResultPage = new SearchResultPage();
-            searchResultPage.productTitleValidation();
+            // cy.get('.glow-toaster-content .glow-toaster-button-dismiss').click()
+            homePage.getHeader().selectDeliverCountry('United Kingdom');
+            homePage.getHeader().searchProductOnName('iphone');
+            cy.wait(2000)
         });
 
+        describe('Shoul include search line in product title', () => {
+            it('separate validation', () => {
+                const searchResultPage = new SearchResultPage();
+                searchResultPage.productTitleValidation();
+            });
+        });
+
+    });
+
+    describe.only('Filter test', () => {
+        const searchResultPage = new SearchResultPage();
+
+        before(() => {
+            cy.visit('https://www.amazon.com/s?k=laptop&ref=nb_sb_noss_1');
+        });
+
+        it('Products title should contain "laptop" line', () => {
+            searchResultPage.productTitleValidation('laptop');
+        });
+
+        it('Price range filter should be apply', () => {
+            searchResultPage.getFilterBlock().applyPriceFilter(0, 500);
+        });
+
+        it('Products price should be less than 500', () => {
+            searchResultPage.productPriceValidation(500);
+        });
     });
 
 });

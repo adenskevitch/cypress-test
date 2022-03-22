@@ -1,11 +1,11 @@
 class AbstraUIObject {
 
     clickOnElement(webElement) {
-        cy.get(webElement).should('be.visible').click();
+        return cy.get(webElement).click();
     }
 
     inputTextToElement(text, webElement) {
-        cy.get(webElement).type(text);
+        return cy.get(webElement).type(text, { force: true });
     }
 }
 
