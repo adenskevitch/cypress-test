@@ -1,9 +1,8 @@
 /// <reference types = 'cypress'/>
 
-import ErrorEnableCookesPage from '../../support/amazon/pages/ErrorEnableCookies';
-import HomePage from '../../support/amazon/pages/Home';
-import SearchResultPage from '../../support/amazon/pages/SearchResult';
-import SignIn from '../../support/amazon/pages/SignIn';
+import { homePage } from '../../support/amazon/pages/Home';
+import { searchResultPage } from '../../support/amazon/pages/SearchResult';
+import { signInPage } from '../../support/amazon/pages/SignIn';
 
 Cypress.on('uncaught:exception', (err, runnable) => {
     // returning false here prevents Cypress from failing the test
@@ -12,62 +11,68 @@ Cypress.on('uncaught:exception', (err, runnable) => {
 
 describe('Amazon tests', () => {
 
-    const homePage = new HomePage();
+    beforeEach(() => {
+        cy.fixture('property').as('property');
+    });
 
     describe('Fail login verification', () => {
 
-        const signInPage = new SignIn();
-        const errorEnableCookesPage = new ErrorEnableCookesPage();
-
-        it('login page should be opened', () => {
-            cy.visit('/');
-
-            homePage.getHeader()
-                .clickOnAccountButton();
+        before(() => {
+            homePage.open();
         });
 
-        it('invalid name field should be input', () => {
-            signInPage
-                .identificationOnNameOrEmail('asdas@asfsaf.asd');
+        it('SignIn page should be opened', () => {
+            homePage.goToSignInPage();
+            signInPage.isSignInPageOpened();
         });
 
-        it('cookies should be enabled', () => {
-            // if(errorEnableCookesPage.isGoBackButtonVisible())
-            errorEnableCookesPage
-                .clickOnGoBackButton()
-                .clickContinue();
+        it('Invalid user data should be input', function () {
+            signInPage.iputInvalidEmail(this.property.email);
         });
 
-        it('allert tet should be validate', () => {
-            signInPage
-                .allertContentVerify('We cannot find an account with that email address');
+        it('Cookies should be enabled', () => {
+            signInPage.getErrorCookiesFrame()
+                .acceptCookiesAndTryAgain();
+            signInPage.clickContinue();
         });
+
+        it('Error message should be validate', function () {
+            signInPage.errorMessageValidation(this.property.signInErrorMessage);
+        });
+
     });
 
     describe('verification search any product', () => {
 
-        it('page with search products should be opened', () => {
-            cy.visit('/');
-            // cy.get('.glow-toaster-content .glow-toaster-button-dismiss').click()
-            homePage.getHeader().selectDeliverCountry('United Kingdom');
-            homePage.getHeader().searchProductOnName('iphone');
-            cy.wait(2000)
+        before(() => {
+            homePage.open();
+        });
+
+        it('Deliver country should be set', function () {
+            homePage.getHeader().selectDeliverCountry(this.property.deliverCountry);
+            homePage.getHeader().deliverCountryVerification(this.property.deliverCountry);
+        });
+
+        it('Page with search products should be opened', function () {
+            homePage.getHeader().searchProductOnName(this.property.searchProduct);
         });
 
         describe('Shoul include search line in product title', () => {
-            it('separate validation', () => {
-                const searchResultPage = new SearchResultPage();
-                searchResultPage.productTitleValidation();
+            it('separate validation', function () {
+                searchResultPage.productTitleValidation(this.property.searchProduct);
             });
         });
 
     });
 
-    describe('Filter test', () => {
-        const searchResultPage = new SearchResultPage();
+    describe.only('Filter test', () => {
 
         before(() => {
-            cy.visit('https://www.amazon.com/s?k=laptop&ref=nb_sb_noss_1');
+            homePage.open()
+        });
+
+        it('Page with search products should be opened', function () {
+            homePage.getHeader().searchProductOnName(this.property.searchProduct);
         });
 
         it('Products title should contain "laptop" line', () => {
@@ -81,13 +86,13 @@ describe('Amazon tests', () => {
         it('Products price should be less than 500', () => {
             searchResultPage.productPriceValidation(500);
         });
+
     });
 
     describe('Waits implementation', () => {
-        const searchResultPage = new SearchResultPage();
 
         before(() => {
-            cy.visit('/');
+            homePage.open()
             homePage.getHeader().searchProductOnName('laptop');
         });
 
@@ -99,22 +104,23 @@ describe('Amazon tests', () => {
             searchResultPage.getFilterBlock().selectBrands('ASUS');
         });
 
-        it('Loading indicator should be hiden',
-            { retries: { openMode: 5 }, defaultCommandTimeout: 5000 }, () => {
-                searchResultPage.waitUntilLoadingCircleHides();
-            });
+        it('Loading indicator should be hiden', {
+            retries: { openMode: 5 },
+            defaultCommandTimeout: 5000
+        }, () => {
+            searchResultPage.waitUntilLoadingCircleHides();
+        });
 
     });
 
-    describe.only('Interceptions', () => {
-        const signInPage = new SignIn();
+    describe('Interceptions', () => {
 
         beforeEach(() => {
-            cy.visit('/');
-
+            homePage.open()
         })
 
         it('Request should include valid email', () => {
+
             cy.intercept('POST', '/ap/*', requ => {
                 // expect(requ.body).to.include('as1q1q1q1qqd%40asd.asd');
                 console.log(requ);
@@ -124,20 +130,30 @@ describe('Amazon tests', () => {
             signInPage.inputTextToElement('as1q1q1q1qqd@asd.asd', signInPage.nameField);
             signInPage.clickContinue();
 
-            cy.wait('@req').then(inter =>
-                expect(inter.request.body).to.include('as1q1q1q1qqd%40asd.asd'));
+            cy.wait('@req').then(inter => {
+                console.log(inter.response);
+                expect(inter.request.body).to.include('as1q1q1q1qqd%40asd.asd');
+            })
+
         });
 
-        it.only('Request should include valid product name', () => {
-            cy.intercept('GET', '/ap/*', requ => {
+        it('Request should include valid product name', () => {
+            cy.intercept('/*', requ => {
                 console.log(requ);
             }).as('req');
 
-            homePage.getHeader().searchProductOnName('laptop');
+            // homePage.getHeader().searchProductOnName('laptop');
+            homePage.getHeader().inputTextToElement('laptop', homePage.getHeader().searchField);
+            homePage.getHeader().clickOnElement(homePage.getHeader().searchButton);
 
-            cy.wait('@req').then(inter =>
-                expect(inter.request.body).to.include('laptop'));
+            cy.wait('@req').then(inter => {
+                console.log(inter.response);
+
+                expect(inter.request).to.deep.include('laptop');
+            });
+
         });
+
     })
 
 });

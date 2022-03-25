@@ -1,0 +1,8 @@
+{
+    "name": "Using fixtures to represent data",
+    "email": "cypress@test.email",
+    "body": "Fixtures are a great way to mock data for responses to routes",
+    "signInErrorMessage": "We cannot find an account with that email address",
+    "deliverCountry": "Belarus",
+    "searchProduct": "laptop"
+}

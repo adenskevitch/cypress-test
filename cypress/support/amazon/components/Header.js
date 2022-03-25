@@ -1,3 +1,4 @@
+import { signInPage } from "../pages/SignIn";
 import AbstraUIObject from "./AbstractUIObject";
 import SelectLocationFrame from "./SelectLocationFrame";
 
@@ -20,11 +21,19 @@ class Header extends AbstraUIObject {
 
     clickOnAccountButton() {
         this.clickOnElement(this.accountButton);
+        return signInPage
     }
 
     selectDeliverCountry(countryName) {
         this.clickOnElement(this.locationGlobalLink);
+        cy.wait(2000)
         this.selectLocationFrame.selectCountry(countryName);
+    }
+
+    deliverCountryVerification(deliverCountry) {
+        cy.get(this.locationGlobalLink)
+            .find('#glow-ingress-line2')
+            .should('contain.text', deliverCountry);
     }
 }
 

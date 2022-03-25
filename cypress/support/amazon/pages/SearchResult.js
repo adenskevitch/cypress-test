@@ -49,4 +49,4 @@ class SearchResultPage extends AbstractPage {
     }
 }
 
-export default SearchResultPage;
+export const searchResultPage = new SearchResultPage();
